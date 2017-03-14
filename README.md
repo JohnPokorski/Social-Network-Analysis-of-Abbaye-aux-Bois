@@ -16,7 +16,9 @@ delimited by slashed ("/").
 Export is created in the GEXF Graph File format, .gexf, for importation into gephy (https://gephi.org/)
 
 To be (possibly) added:
+
 Relations are not properly handled
+
 Edges labeled by charter numbers for the links
 
 Licensed under the MIT License
