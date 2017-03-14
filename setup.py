@@ -1,3 +1,7 @@
+#Build on windows with 
+#> python setup.py build
+#> python setup.py bdist_msi
+
 import sys
 import os
 from cx_Freeze import setup, Executable
@@ -14,7 +18,7 @@ os.environ['TCL_LIBRARY'] = "C:\\Users\\John\\AppData\\Local\\Programs\\Python\\
 os.environ['TK_LIBRARY'] = "C:\\Users\\John\\AppData\\Local\\Programs\\Python\\Python35\\tcl\\tk8.6"
 
 setup(  name = "NetworkAnalyzer",
-        version = "0.1",
+        version = "0.11",
         description = "Convert XLS into Gephi-Readable networks",
         options = {"build_exe": build_exe_options},
         executables = [Executable("Analysis.py", base=base)])

@@ -1,3 +1,4 @@
+#Imports
 import networkx as nx
 from networkx import nodes
 from networkx import write_graphml
@@ -7,18 +8,17 @@ from openpyxl import Workbook
 from openpyxl import load_workbook
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import messagebox
 import sys
 import re
-#reads the given file and returns it as a graph
-#Build network with networkx
-#	Nodes are names and places
-#	Edges are made and strengthened by shared charters between nodes
+import os.path
+
+#Builds a networkx graph from the xcel File
 def buildGraph(file):
 		network = nx.Graph()
 		dataBook = load_workbook(filename=file, read_only=True)
 		dataSheet = dataBook.active
 		entries = []
-		#for each line in the file
 		labelLine = True
 		for row in dataSheet.rows:
 			if(labelLine == True):
@@ -39,15 +39,14 @@ def buildGraph(file):
 						date = cell.value
 					else:
 						if(cell.value != None):
-							regex = re.compile(".*?\((.*?)\)")
 							rawcell = cell.value
-							otherNames = rawcell.split(",")
-							#for name in otherNames:
-								#name = (re.sub("[\(\[].*?[\)\]]", "", name)).rstrip()
+							otherNamesWparnes = rawcell.split(",")
+							otherNames = []
+							for name in otherNamesWparnes:
+								if '(' in name:
+									otherNames.append(name[0:name.index('(')])
 						else:
 							otherNames = []
-						#print("Entry: ")
-						#print("Number: " + str(number) +" Name: " + mainName + " Location: " + location + " Date: " + str(date) + " Other names in charter: " + str(otherNames) + "\n")
 						entries.append([number,mainName,location,date,otherNames])
 		for line in entries:
 			if line[1] not in nodes(network):
@@ -55,35 +54,42 @@ def buildGraph(file):
 			for otherName in line[4]:
 				if otherName not in nodes(network):
 					network.add_node(otherName)
-				network.add_edge(line[1],otherName)
-
-		#check if the first cell has already had a node created
-			#if not, create one
-		#check that the node has a date and number
-			#if not, add them
-		#for each name in other names mentioned
-			#check if the nodes share an edge
-				#if not, make one
-				#else, re-enforce it
+				if not network.has_edge(line[1],otherName):
+					network.add_edge(line[1],otherName,weight = 1)
+				else:
+					network[line[1]][otherName]['weight'] += 1
 		return network
-#network is exported into a raphml file to be viewed in cytoscape
+
+#Exports the networkx graph as a gexf file
 def export(graph, filename):
-	#print(filename)
-	write_gexf(graph,filename)
+	root = tk.Tk()
+	root.withdraw()
+	if os.path.isfile(filename):
+		response = messagebox.askquestion("Duplicate File", "Do you wish to overwrite " + filename + "?")
+		if response == "yes":
+			write_gexf(graph,filename)
+		else:
+			i = 1;
+			while os.path.isfile(filename.split('.')[0] + " (" + str(i) + ") " + filename.split('.')[1]):
+				i = i + 1
+			write_gexf(graph,filename.split('.')[0] + " (" + str(i) + ") " + filename.split('.')[1])
+	else:
+		write_gexf(graph,filename)
 
 #get the file to be analyzed
 def getData():
 	root = tk.Tk()
 	root.withdraw()
 	filePath = filedialog.askopenfilename()
+	if filePath.split(".")[1] != ".xlsx":
+		messagebox.showinfo("Error","Invalid MS Excel 2010 file format")
+		return ""
 	return filePath
 
+#Gets data, builds graph, then exports
 if __name__ == "__main__":
 	#get the path to the file
 	dataPath = getData()
-	graph = buildGraph(dataPath)
-	export(graph,dataPath.split('.')[0]+'result'+'.gexf')
-
-	#if the path is bad, error and end
-	#else, pass the file to buildGraph() and store the resulting graph
-	#export the graph to the desired format
+	if dataPath != "":
+		graph = buildGraph(dataPath)
+		export(graph,dataPath.split('.')[0]+'result'+'.gexf')
