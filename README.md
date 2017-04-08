@@ -9,7 +9,7 @@ A windows installer is provided, created with cx_freeze with the included setup.
 Uses openpyxl (https://openpyxl.readthedocs.io/en/default/) for file parseing, tkinter for GUI elements, and networkx (https://networkx.github.io/) for construction and exportation of the graph.
 
 Input is in the form of a 2010 Microsoft Excel file with each line representing a charter, with the first cell containing the charter
-number, the second cell containing the primary author of the charter, the third the location, the third the date, and the fourth
+number, the second cell containing the primary author of the charter, the third the location, and the fourth
 a list of other names mentioned on the charter, delimited by commas(","), with relations being listed following the name in parentheses,
 delimited by slashed ("/").
 
